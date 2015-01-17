@@ -59,6 +59,13 @@ BasicGame.Game.prototype = {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
+        this.instructions = this.add.text(400, 500, 'Use arrow keys to move\n' + 'Press Z to fire\n' + 'Tapping/clicking does both at once', {
+            font: '20px monspace',
+            fill: '#fff',
+            align: 'center'
+        });
+        this.instructions.anchor.setTo(0.5, 0.5);
+        this.instExpire = this.time.now + 8000;
     },
 
     enemyHit: function (bullet, enemy) {
@@ -116,6 +123,10 @@ BasicGame.Game.prototype = {
 
         if (this.input.keyboard.isDown(Phaser.Keyboard.Z) || this.input.activePointer.isDown) {
             this.fire();
+        }
+
+        if (this.instructions.exists && this.time.now > this.instExpire) {
+            this.instructions.destroy();
         }
 
     },
