@@ -52,9 +52,24 @@ BasicGame.Game.prototype = {
 
     },
 
+    enemyHit: function (bullet, enemy) {
+        bullet.kill();
+        enemy.kill();
+
+        var explosion = this.add.sprite(enemy.x, enemy.y, 'explosion');
+        explosion.anchor.setTo(0.5, 0.5);
+        explosion.animations.add('boom');
+        explosion.play('boom', 15, false, true);
+    },
     update: function () {
 
         this.sea.tilePosition.y += 0.2;
+
+        this.physics.arcade.overlap(this.bullet, this.enemy, this.enemyHit, null, this);
+
+    },
+
+    render: function () {
 
     },
 
