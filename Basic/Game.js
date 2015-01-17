@@ -47,13 +47,30 @@ BasicGame.Game.prototype = {
         this.player.speed = 300;
         this.player.body.collideWorldBounds = true;
 
-        this.enemy = this.add.sprite(400, 200, 'greenEnemy');
-        this.enemy.animations.add('fly', [0, 1, 2], 20, true);
-        this.enemy.play('fly');
-        this.enemy.anchor.setTo(0.5, 0.5);
-        this.physics.enable(this.enemy, Phaser.Physics.ARCADE);
+        this.enemyPool = this.add.group();
+        this.enemyPool.enableBody = true;
+        this.enemyPool.physicsBodyType = Phaser.Physics.ARCADE;
+        this.enemyPool.createMultiple(50, 'greenEnemy');
+        this.enemyPool.setAll('anchor.x', 0.5);
+        this.enemyPool.setAll('anchor.y', 0.5);
+        this.enemyPool.setAll('outOfBoundsKill', true);
+        this.enemyPool.setAll('checkWorldBounds', true);
+        this.enemyPool.forEach(function (enemy) {
+            enemy.animations.add('fly', [0, 1, 2], 20, true);
+        });
 
-        this.bullets = [];
+        this.nextEnemyAt = 0;
+        this.enemyDelay = 1000;
+
+        this.bulletPool = this.add.group();
+        this.bulletPool.enableBody = true;
+        this.bulletPool.physicsBodyType = Phaser.Physics.ARCADE;
+        this.bulletPool.createMultiple(100, 'bullet');
+        this.bulletPool.setAll('anchor.x', 0.5);
+        this.bulletPool.setAll('anchor.y', 0.5);
+        this.bulletPool.setAll('outOfBoundsKill', true);
+        this.bulletPool.setAll('checkWorldBounds', true);
+
         this.nextShotAt = 0;
         this.shotDelay = 100;
 
@@ -84,20 +101,28 @@ BasicGame.Game.prototype = {
             return;
         }
 
+        if (this.bulletPool.countDead() === 0) {
+            return;
+        }
+
         this.nextShotAt = this.time.now + this.shotDelay;
 
-        var bullet = this.add.sprite(this.player.x, this.player.y - 20, 'bullet');
-        bullet.anchor.setTo(0.5, 0.5);
-        this.physics.enable(bullet, Phaser.Physics.ARCADE);
+        var bullet = this.bulletPool.getFirstExists(false);
+        bullet.reset(this.player.x, this.player.y - 20);
         bullet.body.velocity.y = -500;
-        this.bullets.push(bullet);
     },
     update: function () {
 
         this.sea.tilePosition.y += 0.2;
 
-        for (var i = 0; i < this.bullets.length; i++) {
-            this.physics.arcade.overlap(this.bullets[i], this.enemy, this.enemyHit, null, this);
+        this.physics.arcade.overlap(this.bulletPool, this.enemyPool, this.enemyHit, null, this);
+
+        if (this.nextEnemyAt < this.time.now && this.enemyPool.countDead() > 0) {
+            this.nextEnemyAt = this.time.now + this.enemyDelay;
+            var enemy = this.enemyPool.getFirstExists(false);
+            enemy.reset(this.rnd.integerInRange(20, 1004), 0);
+            enemy.body.velocity.y = this.rnd.integerInRange(30, 60);
+            enemy.play('fly');
         }
 
         this.player.body.velocity.x = 0;
