@@ -1,4 +1,13 @@
-var BasicGame = {};
+var BasicGame = {
+	SEA_SCROLL_SPEED: 12,
+	PLAYER_SPEED: 300,
+	SPAWN_ENEMY_DELAY: 1000,
+	SHOT_DELAY: 100,
+	INSTRUCTION_EXPIRE: 10000,
+	ENEMY_MIN_Y_VELOCITY: 30,
+	ENEMY_MAX_Y_VELOCITY: 60,
+	BULLET_VELOCITY: 500
+};
 
 BasicGame.Boot = function (game) {
 
